@@ -1,0 +1,23 @@
+# Compose Specification (Docker Compose v2.20+)
+name: cafe-reservation-api
+volumes:
+  logs:
+
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - ENV_FILE=.env.${ENVIRONMENT:-dev}
+      - ENVIRONMENT=${ENVIRONMENT:-dev}
+    volumes:
+      - ./cafe_reserv.db:/app/cafe_reserv.db
+      - logs:/app/logs
+    restart: unless-stopped
+    networks:
+      - cafe-net
+
+networks:
+  cafe-net:
+    driver: bridge
