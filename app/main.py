@@ -10,8 +10,8 @@ app = FastAPI(
     redoc_url='/api/v1/redoc',
     servers=[
         {
-            "url": "/api/v1",
-            "description": "Локальный сервер"
+            'url': '/api/v1',
+            'description': 'Локальный сервер'
         }
     ]
 )
