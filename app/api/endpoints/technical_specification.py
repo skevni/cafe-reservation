@@ -77,7 +77,7 @@ async def view_tech_spec_redoc():
             ReDoc requires Javascript to function. Please enable it to browse the
             documentation.
             </noscript>
-            <redoc spec-url="/tech_spec/docs/tech_spec"></redoc>
+            <redoc spec-url="/tech_spec"></redoc>
             <script src="https://cdn.jsdelivr.net/npm/redoc@2/bundles/redoc.standalone.js"></script>
         </body>
         </html>

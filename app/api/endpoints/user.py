@@ -1,40 +1,29 @@
-from fastapi import APIRouter, Body, Depends, HTTPException, Response
+from fastapi import APIRouter, Body, Depends, Response
 from fastapi_users import BaseUserManager
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette import status
 
+from app.api.responses.login_responses import (
+    LOGIN_INVALID_RESPONSE, LOGIN_RESPONSES
+)
+from app.exceptions.custom_error import CustomError
 from app.core.db import get_async_session
 from app.core.user import auth_backend, fastapi_users, get_user_manager
 from app.models.user import User
-from app.schemas.auth import LoginRequest
+from app.schemas.auth import AuthToken, LoginRequest
 from app.schemas.user import UserCreate, UserRead, UserUpdate
 
 router = APIRouter()
 
 
 @router.post(
-    '/auth/jwt/login',
+    '/auth/login',
+    response_model=AuthToken,
     summary='Получение токена авторизации',
     description='Возвращает токен для последующей авторизации пользователя.',
     tags=['Аутентификация'],
-    response_description='Успешная аутентификация',
-    responses={
-        200: {
-            'description': 'Токен успешно получен',
-            'content': {
-                'application/json': {
-                    'example': {
-                        'access_token': (
-                            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.xxxxx'
-                        ),
-                        'token_type': 'bearer'
-                    }
-                }
-            }
-        },
-        400: {'description': 'Неверные учётные данные'},
-        401: {'description': 'Ошибка аутентификации'}
-    }
+    responses={**LOGIN_RESPONSES, }
 )
 async def login(
     response: Response,
@@ -56,7 +45,10 @@ async def login(
         token = await auth_backend.login(response, credentials)
         return token
     except Exception:
-        raise HTTPException(status_code=400, detail='Неверные учётные данные')
+        raise CustomError(
+            code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            message=LOGIN_INVALID_RESPONSE['description']
+        )
 
 users_router = fastapi_users.get_users_router(UserRead, UserUpdate)
 users_router.routes = [
@@ -82,8 +74,11 @@ async def create_user(
     try:
         created_user = await manager.create(user_create, safe=False)
         return created_user
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    except Exception:
+        raise CustomError(
+            code=status.HTTP_400_BAD_REQUEST,
+            message='Ошибка в параметрах запроса'
+        )
 
 
 @router.get('/users', response_model=list[UserRead], tags=['Пользователи'])

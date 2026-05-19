@@ -23,3 +23,24 @@ class LoginRequest(BaseModel):
             }
         }
     }
+
+
+class AuthToken(BaseModel):
+    """Ответ с токеном авторизации."""
+    access_token: str = Field(
+        ...,
+        description='JWT токен для авторизации'
+    )
+    token_type: str = Field(
+        ...,
+        description='Тип токена (например, "bearer")'
+    )
+
+    model_config = {
+        'json_schema_extra': {
+            'example': {
+                'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.xxxxx',
+                'token_type': 'bearer'
+            }
+        }
+    }
